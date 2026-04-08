@@ -4,13 +4,13 @@ import { useState } from "react";
 
 
 function App() {
-
-const [navn, setNavn] = useState("");
+// state for navn, epost og tjeneste
+const [navn, setNavn] = useState(""); 
 const [epost, setEpost] = useState("");
 const [tjeneste, setTjeneste] = useState("");
 
 
-const handleBestill = async () => {
+const handleBestill = async () => { // funksjon som venter på svar fra backend
    if (!navn || !epost || !tjeneste) { // om ingenting er fylt ut 
     alert("Fyll ut alle feltene!"); // vises denne meldingen
     return;
@@ -22,8 +22,8 @@ const handleBestill = async () => {
   }
 
     const response = await fetch("http://localhost:5000/bestill", { // URL til backend-endepunktet
-          method: 'POST', // metoden 
-          headers: { "Content-Type": "application/json" },  //  denne er viktig for å fortelle backend at vi sender JSON
+        method: 'POST', // metoden 
+        headers: { "Content-Type": "application/json" },  //  denne er viktig for å fortelle backend at vi sender JSON
         body: JSON.stringify({ navn, epost, tjeneste })  // variabler fra state
     });
     const data = await response.json(); // svar fra backend
@@ -87,7 +87,7 @@ const handleBestill = async () => {
                 borderTop: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <input style={{ padding: "5px", borderRadius: "5px" }} type="text" placeholder="Fullt navn..." onChange={(e) => setNavn(e.target.value)} value={navn} required/>
+              <input style={{ padding: "5px", borderRadius: "5px" }} type="text" placeholder="Fullt navn..." onChange={(e) => setNavn(e.target.value)} value={navn} required/> 
               <input style={{ padding: "5px", borderRadius: "5px" }} type="text" placeholder="Din e-post..."   onChange={(e) => setEpost(e.target.value)} value={epost} required/>
             </div>
 
@@ -98,7 +98,7 @@ const handleBestill = async () => {
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               {["Herreklipp", "Seniorklipp", "Barneklipp", "Maskinklipp", "Barbering", "Maskinbarbering"].map((tjeneste, i) => (
                 <label key={i}>
-                  <input type="radio" name="behandling" value={tjeneste.toLowerCase()}  onChange={(e) => setTjeneste(e.target.value)} required/> {tjeneste}
+                  <input type="radio" name="behandling" value={tjeneste}  onChange={(e) => setTjeneste(e.target.value)} required/> {tjeneste}
                 </label>
               ))}
             </div>
