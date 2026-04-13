@@ -5,3 +5,7 @@ create table Bestilling (
     tjeneste VARCHAR(50),
     opprettet TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO Bestilling (
+    
+)

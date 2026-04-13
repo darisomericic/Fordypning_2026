@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app, origins="http://localhost:5173") # tillater forespørsel fra frontend som kjørerp å localhost:5173 
 
 db = mysql.connector.connect(
-    host=" 172.23.208.1",
+    host="localhost",
     user="root",
     password="daris123",
     database="Fordypning_Demo",
@@ -35,7 +35,7 @@ def bestill():
         return jsonify({"feil": "Ugyldig e-postadresse!"}), 400 # får man denne meldingen
  
     cursor = db.cursor() # starter en SQL kommando for å kunne kjøre SQL kommandoer på db
-    cursor.execute('INSERT INTO bestilling (navn, epost, tjeneste) VALUES (%s, %s, %s)', (data["navn"], data["epost"], data["tjeneste"])) # SQL kommando som lar oss sette det vi vil i db
+    cursor.execute('INSERT INTO bestilling (navn, epost, tjeneste, Tid, Dato) VALUES (%s, %s, %s, %s, %s)', (data["navn"], data["epost"], data["tjeneste"], data["valgtTid"], data["valgtDato"])) # SQL kommando som lar oss sette det vi vil i db
     db.commit() # lagrer endirngene i db
     
     
@@ -56,6 +56,8 @@ def bestill():
     <p style="font-size: 18px;">Din bestilling er mottatt:</p>
     <div style="background-color: #f9f9f9; padding: 10px; border-radius: 5px;">
     <p style="font-size: 16px;"><strong>Tjeneste:</strong> {data['tjeneste']}</p>
+    <p style="font-size: 16px;"><strong>Dato:</strong> {data['valgtDato']}</p>
+    <p style="font-size: 16px;"><strong>Tid:</strong> {data['valgtTid']}</p>
     </div>
     <p style="font-size: 16px;">Vi sees snart!</p>
   </body>

@@ -2,41 +2,64 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
 
-
 function App() {
-// state for navn, epost og tjeneste
-const [navn, setNavn] = useState(""); 
-const [epost, setEpost] = useState("");
-const [tjeneste, setTjeneste] = useState("");
+  // state for navn, epost og tjeneste, og for valgt dato og tid.
+  const [navn, setNavn] = useState("");
+  const [epost, setEpost] = useState("");
+  const [tjeneste, setTjeneste] = useState("");
+  const [valgtDato, setValgtDato] = useState("");
+  const [valgtTid, setValgtTid] = useState("");
 
+  // Genererer alle tider mellom 10:00 og 18:00 med 15 minutters intervaller
+  const alleTider = [];
+  for (let time = 10; time < 18; time++) {
+    // regner time fra  10:00 til 18:00
 
-const handleBestill = async () => { // funksjon som venter på svar fra backend
-   if (!navn || !epost || !tjeneste) { // om ingenting er fylt ut 
-    alert("Fyll ut alle feltene!"); // vises denne meldingen
-    return;
+    for (let minutt = 0; minutt < 60; minutt += 15) {
+      // regner at man kan bestille time basert på hvert 15. minutt
+
+      const tid = `${time}:${minutt === 0 ? "00" : minutt}`; // formaterer at det ikke blir 10:0, men 10:00 f.eks
+
+      alleTider.push(tid); // .push legger til tidene vi har generert i arrayen
+    }
   }
 
-  if (!/\S+@\S+\.\S+/.test(epost)) { // om eposten ikke er gyldig 
-    alert("Vennligst oppgi en gyldig e-postadresse!"); // vises denne meldingen
-    return;
-  }
+  // formulen for stengte dager
+  const erStengtDag = () => {
+    if (!valgtDato) return false; // hvis ingen av stengte dager er valgt, viser den ikke noe
 
-    const response = await fetch("http://localhost:5000/bestill", { // URL til backend-endepunktet
-        method: 'POST', // metoden 
-        headers: { "Content-Type": "application/json" },  //  denne er viktig for å fortelle backend at vi sender JSON
-        body: JSON.stringify({ navn, epost, tjeneste })  // variabler fra state
+    const dag = new Date(valgtDato).getDay(); // bruker getday for å gå gjennom alle dager i uken
+    return dag === 0 || dag === 1; // 0 = søndag, 1 = mandag, og det returnerer true hvis stengt
+  };
+
+  const handleBestill = async () => {
+    // funksjon som venter på svar fra backend
+    if (!navn || !epost || !tjeneste) {
+      // om ingenting er fylt ut
+      alert("Fyll ut alle feltene!"); // vises denne meldingen
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(epost)) {
+      // om eposten ikke er gyldig
+      alert("Vennligst oppgi en gyldig e-postadresse!"); // vises denne meldingen
+      return;
+    }
+
+    const response = await fetch("http://localhost:5000/bestill", {
+      // URL til backend-endepunktet
+      method: "POST", // metoden
+      headers: { "Content-Type": "application/json" }, //  denne er viktig for å fortelle backend at vi sender JSON
+      body: JSON.stringify({ navn, epost, tjeneste, valgtTid, valgtDato }), // variabler fra state gjort til json for å kunne sendes til backend
     });
     const data = await response.json(); // svar fra backend
-    return (alert(data.message) // viser melding fra backend
-    );
-};
-
+    return alert(data.message); // viser melding fra backend
+  };
 
   return (
-
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button >Bestill time!</button>
+        <button>Bestill time!</button>
       </Dialog.Trigger>
 
       <Dialog.Portal>
@@ -58,13 +81,17 @@ const handleBestill = async () => { // funksjon som venter på svar fra backend
             transform: "translate(-50%, -50%)",
             zIndex: 9999,
             width: "90vw",
-            maxWidth: "450px",
+            maxWidth: "550px",
+            maxHeight: "85vh",
+            overflowY: "auto",
             backgroundColor: "#37383E",
             color: "#CCD7D8",
             padding: "2rem",
             borderRadius: "1.25rem",
             border: "1px solid rgba(255,255,255,0.1)",
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
           }}
         >
           <div style={{ position: "relative" }}>
@@ -87,23 +114,135 @@ const handleBestill = async () => { // funksjon som venter på svar fra backend
                 borderTop: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <input style={{ padding: "5px", borderRadius: "5px" }} type="text" placeholder="Fullt navn..." onChange={(e) => setNavn(e.target.value)} value={navn} required/> 
-              <input style={{ padding: "5px", borderRadius: "5px" }} type="text" placeholder="Din e-post..."   onChange={(e) => setEpost(e.target.value)} value={epost} required/>
+              <input
+                style={{ padding: "5px", borderRadius: "5px" }}
+                type="text"
+                placeholder="Fullt navn..."
+                onChange={(e) => setNavn(e.target.value)}
+                value={navn}
+                required
+              />
+              <input
+                style={{ padding: "5px", borderRadius: "5px" }}
+                type="text"
+                placeholder="Din e-post..."
+                onChange={(e) => setEpost(e.target.value)}
+                value={epost}
+                required
+              />
             </div>
 
-            <h3 style={{ fontSize: "17px", borderTop: "1px solid rgba(255,255,255,0.1)", padding: "1rem 0" }}>
+            <h3
+              style={{
+                fontSize: "17px",
+                borderTop: "1px solid rgba(255,255,255,0.1)",
+                padding: "0.5rem 0",
+              }}
+            >
               Velg tjeneste:
             </h3>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-              {["Herreklipp", "Seniorklipp", "Barneklipp", "Maskinklipp", "Barbering", "Maskinbarbering"].map((tjeneste, i) => (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "15px",
+                padding: "0.5rem 0",
+              }}
+            >
+              {[
+                "Herreklipp",
+                "Seniorklipp",
+                "Barneklipp",
+                "Maskinklipp",
+                "Barbering",
+                "Maskinbarbering",
+              ].map((tjeneste, i) => (
                 <label key={i}>
-                  <input type="radio" name="behandling" value={tjeneste}  onChange={(e) => setTjeneste(e.target.value)} required/> {tjeneste}
+                  <input
+                    type="radio"
+                    name="behandling"
+                    value={tjeneste}
+                    onChange={(e) => setTjeneste(e.target.value)}
+                    required
+                  />{" "}
+                  {tjeneste}
                 </label>
               ))}
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "10px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "5px",
+              }}
+            >
+              <label>Velg dag:</label>
+              <input
+                type="date"
+                value={valgtDato}
+                onChange={(e) => setValgtDato(e.target.value)}
+                style={{
+                  width: "96%",
+                  padding: "10px",
+                  margin: "",
+                  marginTop: "10px",
+                }}
+              />
+
+              {erStengtDag() ? (
+                <p
+                  style={{
+                    color: "red",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  Vi holder stengt på søndager og mandager!
+                </p>
+              ) : (
+                <>
+                  <label>Velg tid (10:00 - 18:00):</label>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gap: "10px",
+                      marginTop: "10px",
+                    }}
+                  >
+                    {alleTider.map((t) => (
+                      <button
+                        type="button"
+                        key={t}
+                        onClick={() => setValgtTid(t)}
+                        style={{
+                          padding: "10px",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                          border: "1px solid #ccc",
+                          // Blir grønn når den er valgt
+                          backgroundColor: valgtTid === t ? "#4CAF50" : "#fff",
+                          color: valgtTid === t ? "white" : "black",
+                        }}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginTop: "1rem",
+              }}
+            >
               <button onClick={handleBestill}>Bestill</button>
             </div>
 
@@ -127,4 +266,4 @@ const handleBestill = async () => { // funksjon som venter på svar fra backend
   );
 }
 
-export default App
+export default App;
