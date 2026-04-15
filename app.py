@@ -6,7 +6,7 @@ from flask_mail import Mail, Message
 
 
 app = Flask(__name__)
-CORS(app, origins="http://localhost:5173") # tillater forespørsel fra frontend som kjørerp å localhost:5173 
+CORS(app, origins="http://localhost:5173", resources={r"/*": {"origins": "http://localhost:5173"}})
 
 db = mysql.connector.connect(
     host="localhost",
@@ -30,6 +30,16 @@ def gyldig_mail(epost): # definisjon for å sjekke om epost er gyldig med regex
 @app.route("/bestill", methods=["POST"]) #  
 def bestill():
     data = request.json # henter data fra frontend ved hjelp av json 
+    
+    cursor = db.cursor() # starter en SQL kommando for å kunne kjøre SQL kommandoer på db
+    
+    cursor.execute('SELECT * FROM bestilling WHERE Tid = %s AND Dato = %s', 
+        (data["valgtTid"], data["valgtDato"])
+    )
+    eksisterende_bestilling = cursor.fetchone()   
+    
+    if eksisterende_bestilling: 
+        return jsonify({"opptatt": "Tidspunktet du har valgt er dessverre ikke tilgjengelig. Vennlig velg et annet tidspunkt!"}), 400 # hvis det allerede er en bestilling på det
    
     if not gyldig_mail(data["epost"]): # om eposten er ikke gyldig 
         return jsonify({"feil": "Ugyldig e-postadresse!"}), 400 # får man denne meldingen
@@ -37,6 +47,7 @@ def bestill():
     cursor = db.cursor() # starter en SQL kommando for å kunne kjøre SQL kommandoer på db
     cursor.execute('INSERT INTO bestilling (navn, epost, tjeneste, Tid, Dato) VALUES (%s, %s, %s, %s, %s)', (data["navn"], data["epost"], data["tjeneste"], data["valgtTid"], data["valgtDato"])) # SQL kommando som lar oss sette det vi vil i db
     db.commit() # lagrer endirngene i db
+    cursor.close() # lukker SQL kommandoen
     
     
     
@@ -66,8 +77,19 @@ def bestill():
     mail.send(msg) # epost sendes til kunden 
     return jsonify({"message": "Bestilling mottatt!"})
 
+@app.route("/hent-bestillinger", methods=["GET"]) # route for å hente bestillinger baser på data 
 
-
+def hent_bestillinger():
+    
+    dato = request.args.get("dato") # henter dat ut ifra det brukeren velger i frontend 
+    
+    cursor = db.cursor() # starter opp cursor for SQL kommandoer
+    cursor.execute('SELECT Tid FROM bestilling WHERE Dato = %s', (dato,)) # SQL kommando for å hente alle tider basert på datoen som er valgt
+    rader = cursor.fetchall() # henter alle rader som matcher datoen og legger det i en variabel, der hver rad inneholder bestemt tid som er bestilt
+    tider = [rad[0] for rad in rader] # lager en liste over alle tider som er bestilt ved å gå gjennom alle radene for å sjekke tiden
+    cursor.close() # lukker cursor 
+    
+    return jsonify({"tider": tider}) # returnerer tider som er bestilt og grått ut 
 
 
 if __name__ == "__main__":

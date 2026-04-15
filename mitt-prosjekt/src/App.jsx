@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   // state for navn, epost og tjeneste, og for valgt dato og tid.
@@ -9,6 +9,23 @@ function App() {
   const [tjeneste, setTjeneste] = useState("");
   const [valgtDato, setValgtDato] = useState("");
   const [valgtTid, setValgtTid] = useState("");
+  const [open, setOpen] = useState(false); // state for å åpne og lukke dialogen
+  const [tatteTider, setTatteTider] = useState([]); // Liste over tider som er bestilt
+
+  useEffect(() => {
+    // kjøres hele tiden dersom datoen endres
+    if (!valgtDato || erStengtDag()) return; // hvis ingen dato er valgt eller det er en stengt dag, gjør den ingenting
+
+    fetch(`http://localhost:5000/hent-bestillinger?dato=${valgtDato}`) // henter bestillinger for den valgte datoen
+      .then((response) => response.json()) // konverterer svarene til json når de er klare
+      .then((data) => {
+        // liste over tider som er bestilt når de blir hentet
+
+        // Formater til samme format som tatteTider bruker: "dato-tid"
+        const opptatte = data.tider.map((tid) => `${valgtDato}-${tid}`); // lagen en liste over tider for bestemte datoen som er bestilt
+        setTatteTider(opptatte); // oppdaterer dersom tidene er opptatte
+      });
+  }, [valgtDato]); // brukes forat useEffect skal kjøre på nytt hver gang valgtDato endres
 
   // Genererer alle tider mellom 10:00 og 18:00 med 15 minutters intervaller
   const alleTider = [];
@@ -50,10 +67,23 @@ function App() {
       // URL til backend-endepunktet
       method: "POST", // metoden
       headers: { "Content-Type": "application/json" }, //  denne er viktig for å fortelle backend at vi sender JSON
-      body: JSON.stringify({ navn, epost, tjeneste, valgtTid, valgtDato }), // variabler fra state gjort til json for å kunne sendes til backend
+      body: JSON.stringify({
+        navn,
+        epost,
+        tjeneste,
+        valgtTid: valgtTid,
+        valgtDato: valgtDato,
+      }), // variabler fra state gjort til json for å kunne sendes til backend
     });
-    const data = await response.json(); // svar fra backend
-    return alert(data.message); // viser melding fra backend
+    const result = await response.json(); // svar fra backend
+    if (!response.ok) {
+      // om responsen ikke er ok
+      alert(result.opptatt); // hvis det er en feil, vises denne meldingen
+    } else {
+      alert("Timen er din!"); // ellers er tiden bestilt
+      setTatteTider([...tatteTider, `${valgtDato}-${valgtTid}`]); // legger til den nye bestillingen i listen over tatte tider
+      setOpen(false);
+    }
   };
 
   return (
@@ -213,24 +243,37 @@ function App() {
                       marginTop: "10px",
                     }}
                   >
-                    {alleTider.map((t) => (
-                      <button
-                        type="button"
-                        key={t}
-                        onClick={() => setValgtTid(t)}
-                        style={{
-                          padding: "10px",
-                          borderRadius: "5px",
-                          cursor: "pointer",
-                          border: "1px solid #ccc",
-                          // Blir grønn når den er valgt
-                          backgroundColor: valgtTid === t ? "#4CAF50" : "#fff",
-                          color: valgtTid === t ? "white" : "black",
-                        }}
-                      >
-                        {t}
-                      </button>
-                    ))}
+                    {alleTider.map((t) => {
+                      // går gjennom alle tider som er generert
+                      const denneIDen = `${valgtDato}-${t}`; // lager en unik ID for hver tid basert på dato og tid
+                      const erOpptatt = tatteTider.includes(denneIDen); // Sjekker om tiden er i listen vår
+
+                      return (
+                        <button
+                          type="button"
+                          key={t}
+                          disabled={erOpptatt} // GJØR AT MAN IKKE KAN TRYKKE
+                          onClick={() => setValgtTid(t)} // setter valgt tid
+                          style={{
+                            padding: "10px",
+                            borderRadius: "5px",
+                            border: "1px solid #ccc",
+                            // FARGE-LOGIKK:
+                            backgroundColor: erOpptatt
+                              ? "#999"
+                              : valgtTid === t
+                                ? "#4CAF50"
+                                : "#fff",
+                            color:
+                              erOpptatt || valgtTid === t ? "white" : "black",
+                            cursor: erOpptatt ? "not-allowed" : "pointer",
+                            opacity: erOpptatt ? 0.5 : 1,
+                          }}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               )}
