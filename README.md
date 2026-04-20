@@ -2,7 +2,7 @@
 
 ## 📌 Om prosjektet
 
-Dette prosjektet er en fullstack booking-nettside som er en del av **barbershop-prosjektet** og lar brukere se tilgjengelige tjenester og bestille timer direkte gjennom applikasjonen.
+Dette prosjektet er en fullstack booking-nettside som er en del av **https://github.com/darisomericic/Barbershop_ProsjektVG2** og lar brukere se tilgjengelige tjenester og bestille timer direkte gjennom applikasjonen.
 
 Nettsiden sammenligner tilgjengelighet på valgte datoer, og lagrer alle bestillinger sikkert i en database med automatisk e-postbekreftelse.
 
