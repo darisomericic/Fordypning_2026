@@ -3,6 +3,7 @@ from flask_cors import CORS
 import mysql.connector
 import re 
 from flask_mail import Mail, Message
+from datetime import date
 
 
 app = Flask(__name__)
@@ -27,9 +28,18 @@ mail = Mail(app) # putter mail funksjonen i appen
 def gyldig_mail(epost): # definisjon for å sjekke om epost er gyldig med regex
     return re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', epost) # regex som sjekker at eposten er gyldig
 
+
+
 @app.route("/bestill", methods=["POST"]) #  
 def bestill():
     data = request.json # henter data fra frontend ved hjelp av json 
+    valgt_dato_str = data.get("valgtDato") 
+    
+    valgt_dato = date.fromisoformat(valgt_dato_str)
+    iDag = date.today()
+    
+    if valgt_dato < iDag:
+        return jsonify({"error": "Ikke mulig å bestille i fortiden"}), 400 # hvis datoen er i fortiden, får man denne meldingen
     
     cursor = db.cursor() # starter en SQL kommando for å kunne kjøre SQL kommandoer på db
     
@@ -76,6 +86,9 @@ def bestill():
 """
     mail.send(msg) # epost sendes til kunden 
     return jsonify({"message": "Bestilling mottatt!"})
+
+
+
 
 @app.route("/hent-bestillinger", methods=["GET"]) # route for å hente bestillinger baser på data 
 

@@ -11,10 +11,13 @@ function App() {
   const [valgtTid, setValgtTid] = useState("");
   const [open, setOpen] = useState(false); // state for å åpne og lukke dialogen
   const [tatteTider, setTatteTider] = useState([]); // Liste over tider som er bestilt
+ 
+  
 
   useEffect(() => {
     // kjøres hele tiden dersom datoen endres
     if (!valgtDato || erStengtDag()) return; // hvis ingen dato er valgt eller det er en stengt dag, gjør den ingenting
+
 
     fetch(`http://localhost:5000/hent-bestillinger?dato=${valgtDato}`) // henter bestillinger for den valgte datoen
       .then((response) => response.json()) // konverterer svarene til json når de er klare
@@ -26,6 +29,7 @@ function App() {
         setTatteTider(opptatte); // oppdaterer dersom tidene er opptatte
       });
   }, [valgtDato]); // brukes forat useEffect skal kjøre på nytt hver gang valgtDato endres
+
 
   // Genererer alle tider mellom 10:00 og 18:00 med 15 minutters intervaller
   const alleTider = [];
@@ -57,14 +61,14 @@ function App() {
       return;
     }
 
+    // om eposten ikke er gyldig
     if (!/\S+@\S+\.\S+/.test(epost)) {
-      // om eposten ikke er gyldig
       alert("Vennligst oppgi en gyldig e-postadresse!"); // vises denne meldingen
       return;
     }
 
+    // URL til backend-endepunktet
     const response = await fetch("http://localhost:5000/bestill", {
-      // URL til backend-endepunktet
       method: "POST", // metoden
       headers: { "Content-Type": "application/json" }, //  denne er viktig for å fortelle backend at vi sender JSON
       body: JSON.stringify({
@@ -75,9 +79,11 @@ function App() {
         valgtDato: valgtDato,
       }), // variabler fra state gjort til json for å kunne sendes til backend
     });
+
     const result = await response.json(); // svar fra backend
+
+    // om responsen ikke er ok
     if (!response.ok) {
-      // om responsen ikke er ok
       alert(result.opptatt); // hvis det er en feil, vises denne meldingen
     } else {
       alert("Timen er din!"); // ellers er tiden bestilt
@@ -85,6 +91,10 @@ function App() {
       setOpen(false);
     }
   };
+
+  const iDag = new Date().toISOString().split("T")[0]; // dagens dato i formatet YYYY-MM-DD
+
+  
 
   return (
     <Dialog.Root>
@@ -213,6 +223,8 @@ function App() {
               <input
                 type="date"
                 value={valgtDato}
+                min={iDag} // setter minimum dato til dagens dato
+                onChange={(e) => setvalgtDato(e.target.value)}
                 onChange={(e) => setValgtDato(e.target.value)}
                 style={{
                   width: "96%",

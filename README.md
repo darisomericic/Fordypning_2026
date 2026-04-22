@@ -1,8 +1,17 @@
-#  Booking System - Fordypning
+<div>
+<h1 align= "center">Booking System - Fordypning</h1>
+</div>
+
+<div>
+<img src="./mitt-prosjekt//src/assets/modal.png"
+ style= "border-radius: 10px">
+</div>
+
+
 
 ## 📌 Om prosjektet
 
-Dette prosjektet er en fullstack booking-nettside som er en del av **barbershop-prosjektet** og lar brukere se tilgjengelige tjenester og bestille timer direkte gjennom applikasjonen.
+Dette prosjektet er en fullstack booking-nettside som er en del av **https://github.com/darisomericic/Barbershop_ProsjektVG2** og lar brukere se tilgjengelige tjenester og bestille timer direkte gjennom applikasjonen.
 
 Nettsiden sammenligner tilgjengelighet på valgte datoer, og lagrer alle bestillinger sikkert i en database med automatisk e-postbekreftelse.
 
@@ -10,9 +19,27 @@ Prosjektet er laget som en del av et skoleprosjekt for å demonstrere forståels
 
 ---
 
+
+## ✨ Funksjoner
+
+### Hva nettsiden viser/gjør
+
+Applikasjonen inneholder følgende funksjonalitet:
+
+* Brukergrensesnitt for booking av timer
+* Valg av tjeneste, dato og tidspunkt
+* Automatisk validering av e-postadresse
+* Sjekk av tilgjengelige tidspunkter
+* Booking-modal/skjema
+* Lagring av all bestillingsinformasjon i database
+* Automatisk e-postbekreftelse til kunden
+* Feilbehandling for doble bestillinger
+
+---
+
 ## ⚙️ Teknologier
 
-Prosjektet bruker følgende teknologier:
+### Hvordan nettsidens teknologi fungerer
 
 ### Frontend:
 
@@ -32,20 +59,47 @@ Prosjektet bruker følgende teknologier:
 
 ---
 
-## ✨ Funksjoner
+## ❓Hvorfor brukte jeg disse teknologier
 
-Applikasjonen inneholder følgende funksjonalitet:
+### Hvorfor brukte jeg **React** 
 
-* Brukergrensesnitt for booking av timer
-* Valg av tjeneste, dato og tidspunkt
-* Automatisk validering av e-postadresse
-* Sjekk av tilgjengelige tidspunkter
-* Booking-modal/skjema
-* Lagring av all bestillingsinformasjon i database
-* Automatisk e-postbekreftelse til kunden
-* Feilbehandling for doble bestillinger
+- Hadde den som interessegruppe på skolen, og fikk mye ut ifra den
+
+- Veldig bra for dynamiske nettsider, som denne
+
+- Gir bedre oversikt over filer, og gir bedre mappestruktur enn bare HTML/CSS
 
 ---
+
+### Hvorfor brukte jeg både **POST** og **GET** som metoder 
+
+- Brukte POST for å sende ut data og GET for å hente inn data
+
+- Har nylig hatt forelesning om disse metoder, så ville prøve hvordan de fungerer
+
+- Ville lære meg hvordan begge fungerer og hva de gjør for nettsiden
+
+---
+
+### Hvorfor brukte jeg ikke **.env** for å gjøre sensitiv informasjon skjult
+
+- Oppgaven er fordypning, som betyr å utdype meg i det jeg ikke kan 
+
+- Jeg var bevisst på at jeg lot informasjon som kunne vært sensitiv ligge åpen.
+
+- Oppgaven er en lokal demo uten viktig informasjon som kan ramme meg, eller noen andre 
+
+
+### Hvorfor har jeg mange kommentarer i koden 
+
+- For oversikt over hva koden er, og hva den gjør
+
+- For teknisk informasjon er avgjørende for vedlikehold og videreutvikling av nettsiden
+
+- Lærere og arbeidsgivere liker å se kommentarer i koden, og det viser forståelse
+
+
+
 
 ## 📋 Booking informasjon
 
