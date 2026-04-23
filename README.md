@@ -1,5 +1,5 @@
 <div>
-<h1 align= "center">Booking System - Fordypning</h1>
+<h1 align= "center">Booking System - Fordypning & Oppdrag</h1>
 </div>
 
 <div>
