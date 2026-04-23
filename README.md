@@ -4,7 +4,7 @@
 
 <div>
 <img src="./mitt-prosjekt//src/assets/modal.png"
- style= "border-radius: 10px">
+ style= border-radius: "10px">
 </div>
 
 
